@@ -2,8 +2,16 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import instance from '../../axios';
 
 
-export const fetchAuth = createAsyncThunk('posts/fetchUserData', async (params) => {
+export const fetchAuth = createAsyncThunk('auth/fetchAuth', async (params) => {
     const { data } = await instance.post('/auth/login', params);
+    return data;
+})
+export const fetchAuthMe = createAsyncThunk('auth/fetchAuthMe', async () => {  //тут параметры не задаем, потому что, на аусми мы не передаем с запросом вручную что то, это делается в файле аксиос. Мы вшиваем в запрос , проверку на токе
+    const { data } = await instance.get('/auth/me');
+    return data;
+})
+export const fetchRegister = createAsyncThunk('auth/fetchRegister', async (params) => {  
+    const { data } = await instance.post('/auth/register', params);
     return data;
 })
 
@@ -15,7 +23,11 @@ const initialState = {
 const authSlice = createSlice({
     name: 'auth',
     initialState,
-    reducer: { },
+    reducers: {
+        logout: (state) => {
+            state.data = null;
+        }
+    },
     extraReducers: {
         [fetchAuth.pending] : (state) => {
             state.status = 'loading';
@@ -25,7 +37,31 @@ const authSlice = createSlice({
             state.status = 'loaded';
             state.data = action.payload;
         },
-        [fetchAuth.rejected] : (state, action) => {
+        [fetchAuth.rejected] : (state) => {
+            state.status = 'error';
+            state.data = null;
+        },
+        [fetchAuthMe.pending] : (state) => {
+            state.status = 'loading';
+            state.data = null
+        },
+        [fetchAuthMe.fulfilled] : (state, action) => {
+            state.status = 'loaded';
+            state.data = action.payload;
+        },
+        [fetchAuthMe.rejected] : (state) => {
+            state.status = 'error';
+            state.data = null;
+        },
+        [fetchRegister.pending] : (state) => {
+            state.status = 'loading';
+            state.data = null
+        },
+        [fetchRegister.fulfilled] : (state, action) => {
+            state.status = 'loaded';
+            state.data = action.payload;
+        },
+        [fetchRegister.rejected] : (state) => {
             state.status = 'error';
             state.data = null;
         }
@@ -34,3 +70,5 @@ const authSlice = createSlice({
 
 
 export const authReducer = authSlice.reducer;
+export const { logout } = authSlice.actions;
+export const selectIsAuth = (state) => Boolean(state.auth.data);
