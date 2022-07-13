@@ -5,8 +5,8 @@ export const create = async (req, res) => {
         const doc = new PostModel({
             title: req.body.title,
             text: req.body.text,
-            tags: req.body.tags,
-            imagerUrl: req.body.imageUrl,
+            tags: req.body.tags.split(','),
+            imageUrl: req.body.imageUrl,
 
             user: req.userId,
         });
@@ -74,7 +74,7 @@ export const getOne = async (req, res) => {
             }
             res.json(doc);
         }
-        );
+        ).populate('user');
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -123,8 +123,8 @@ export const update = async (req, res) => {
         {
             title: req.body.title,
             text: req.body.text,
-            tags: req.body.tags,
-            imagerUrl: req.body.imageUrl,
+            tags: req.body.tags.split(','),
+            imageUrl: req.body.imageUrl,
             user: req.userId,
         })
         res.json({
@@ -137,3 +137,11 @@ export const update = async (req, res) => {
         })
     }
 }
+
+// export const getByViews = async (req, res) => {
+//     try {
+//         const sortedPosts = await PostModel.find({}).sort({viewsCount: (a) => {a > b}})
+//     } catch (error) {
+        
+//     }
+// }
