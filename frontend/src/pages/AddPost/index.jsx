@@ -13,6 +13,7 @@ import instance from '../../axios';
 
 export const AddPost = () => {
   const {id} = useParams();
+  const isEditing = Boolean(id);
   const isAuth = useSelector(selectIsAuth);
   const [imageUrl, setImageUrl] = useState('');
   const [text, setText] = useState('');
@@ -56,9 +57,12 @@ export const AddPost = () => {
       tags,
       text
     }
-    const { data } = await instance.post('/posts', fields);
-    const id = data._id;
-    navigate(`/posts/${id}`);
+    const { data } = isEditing
+    ? await instance.patch(`/posts/${id}`, fields)
+    : await instance.post('/posts', fields);
+
+    const _id = isEditing? id : data._id;
+    navigate(`/posts/${_id}`);
   } catch (error) {
       console.warn(error);
       alert('failed to create new post')
@@ -134,10 +138,10 @@ export const AddPost = () => {
       <SimpleMDE className={styles.editor} value={text} onChange={onChange} options={options} />
       <div className={styles.buttons}>
         <Button onClick={onSubmit} size="large" variant="contained">
-          Опубликовать
+          {isEditing?'Save changes':'Publish'}
         </Button>
         <a href="/">
-          <Button size="large">Отмена</Button>
+          <Button size="large">Cancel</Button>
         </a>
       </div>
     </Paper>
